@@ -20,6 +20,7 @@ import {
   SelectItem,
   Input,
   addToast,
+  Pagination,
 } from '@heroui/react';
 import StudentSearch from '@/app/components/contents/StudentSearch';
 import { columns } from '@/app/components/contents/StudentScore';
@@ -63,6 +64,8 @@ export default function Dashboard() {
   const { isOpen: isAddOpen, onOpen: onAddOpen, onOpenChange: onAddOpenChange } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isViewOpen, onOpen: onViewOpen, onOpenChange: onViewOpenChange } = useDisclosure();
+  const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
+  const studentsPerPage = 10; // จำนวนนักเรียนต่อหน้า
 
   // Score states as numbers
   const [reading, setReading] = useState<number | null>(null);
@@ -362,6 +365,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleSearch = (filtered: Student[]) => {
+    setDisplayedStudents(filtered);
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(displayedStudents.length / studentsPerPage);
+  const startIndex = (currentPage - 1) * studentsPerPage;
+  const endIndex = startIndex + studentsPerPage;
+  const currentStudents = displayedStudents.slice(startIndex, endIndex);
+
   useEffect(() => {
     fetchStudents();
     fetchScore();
@@ -421,7 +434,7 @@ export default function Dashboard() {
       </div>
       <Card className="mt-10">
         <CardBody>
-          <StudentSearch student={allStudents} onSearch={filtered => setDisplayedStudents(filtered)} />
+          <StudentSearch student={allStudents} onSearch={handleSearch} />
           <Table aria-label="Student score table with custom cells">
             <TableHeader>
               {columns.map(column => (
@@ -431,7 +444,7 @@ export default function Dashboard() {
               ))}
             </TableHeader>
             <TableBody>
-              {displayedStudents.map((student: Student) => (
+              {currentStudents.map((student: Student) => (
                 <TableRow key={student.id}>
                   {columns.map(column => (
                     <TableCell key={column.uid}>{renderCell(student, column.uid)}</TableCell>
@@ -440,6 +453,7 @@ export default function Dashboard() {
               ))}
             </TableBody>
           </Table>
+          <Pagination total={totalPages} page={currentPage} onChange={setCurrentPage} className="flex justify-center mt-5" />
         </CardBody>
       </Card>
 

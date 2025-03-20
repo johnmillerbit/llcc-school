@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+const cache = new Map();
+
 async function generateStudentId(classId: string, semester: string): Promise<string> {
   const year = semester.split('-')[0].slice(-2);
 
@@ -15,6 +17,7 @@ async function generateStudentId(classId: string, semester: string): Promise<str
       sequence: 'desc',
     },
   });
+  cache.delete("student")
 
   const sequence = (lastStudent?.sequence ?? 0) + 1;
   const paddedSequence = sequence.toString().padStart(2, '0');

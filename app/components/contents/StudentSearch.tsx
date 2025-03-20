@@ -45,13 +45,13 @@ export default function StudentSearch({ student, onSearch }: StudentSearchProps)
   return (
     <div>
       <div className="grid grid-cols-3 gap-5">
-        <Input label="Name" placeholder="Search name" onChange={e => setNameQuery(e.target.value)} className="mb-4" />
-        <Select onChange={e => setSemesterQuery(e.target.value)} label="Select semester">
+        <Input label="Name" placeholder="Name" onChange={e => setNameQuery(e.target.value)} className="mb-4" />
+        <Select onChange={e => setSemesterQuery(e.target.value)} label="Semester">
           {semester.map(semester => (
             <SelectItem key={semester.key}>{semester.lable}</SelectItem>
           ))}
         </Select>
-        <Select onChange={e => setClassQuery(e.target.value)} label="Select class">
+        <Select onChange={e => setClassQuery(e.target.value)} label="Class">
           {classNumber.map(number => (
             <SelectItem key={number.key}>{number.lable}</SelectItem>
           ))}

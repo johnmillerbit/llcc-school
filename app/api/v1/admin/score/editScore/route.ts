@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+const cache = new Map()
 
 export async function PUT(req: NextRequest) {
   try {
@@ -49,6 +50,7 @@ export async function PUT(req: NextRequest) {
         });
       }
     }
+    cache.delete("score")
 
     return new Response(JSON.stringify({ message: 'Scores updated successfully' }), {
       status: 200,

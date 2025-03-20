@@ -3,6 +3,7 @@
 
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Table, TableHeader, TableBody, TableRow, TableColumn, TableCell, Button, Spinner } from '@heroui/react';
 import { ScoreElement } from '@/app/types/score';
+
 interface StudentScoreViewProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -24,7 +25,7 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
   return (
     <Modal size="5xl" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
       <ModalContent>
-        {onClose => (
+        {(onClose) => (
           <>
             <ModalHeader>View Student Scores</ModalHeader>
             <ModalBody>
@@ -34,17 +35,17 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                 </div>
               ) : scores && scores.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[1,2,3,4,5,6].map(term => {
-                    const termScores = scores.filter(score => score.term === term);
+                  {[1, 2, 3, 4, 5, 6].map((term) => {
+                    const termScores = scores.filter((score) => score.term === term);
                     return (
-                      <Table key={term} isStriped aria-label={`Term ${term}`}>
-                        <TableHeader>
-                          <TableColumn>Subjects (Term {term})</TableColumn>
-                          <TableColumn>Scale 100</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                          <>
-                            {termScores.map(score => {
+                      termScores.length > 0 && (
+                        <Table key={term} isStriped aria-label={`Term ${term}`}>
+                          <TableHeader>
+                            <TableColumn>Subjects (Term {term})</TableColumn>
+                            <TableColumn>Scale 100</TableColumn>
+                          </TableHeader>
+                          <TableBody>
+                            {termScores.map((score) => {
                               const subjectName = (() => {
                                 switch (score.subject_id) {
                                   case SUBJECT_IDS.READING:
@@ -72,27 +73,34 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                                   <TableCell>{score.value}</TableCell>
                                 </TableRow>
                               );
-                            })}
-                            <TableRow key={`${term}-average`}>
-                              <TableCell>Average Point</TableCell>
-                              <TableCell>{termScores.length > 0 ? (termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length).toFixed(2) : 'N/A'}</TableCell>
-                            </TableRow>
-                            <TableRow key={`${term}-grade`}>
-                              <TableCell>Grade</TableCell>
-                              <TableCell>
-                                {(() => {
-                                  const average = termScores.length > 0 ? termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length : 0;
-                                  if (average >= 90) return 'A';
-                                  if (average >= 80) return 'B';
-                                  if (average >= 70) return 'C';
-                                  if (average >= 60) return 'D';
-                                  return 'F';
-                                })()}
-                              </TableCell>
-                            </TableRow>
-                          </>
-                        </TableBody>
-                      </Table>
+                            }).concat([
+                              <TableRow key={`${term}-average`}>
+                                <TableCell>Average Point</TableCell>
+                                <TableCell>
+                                  {termScores.length > 0
+                                    ? (termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length).toFixed(2)
+                                    : 'N/A'}
+                                </TableCell>
+                              </TableRow>,
+                              <TableRow key={`${term}-grade`}>
+                                <TableCell>Grade</TableCell>
+                                <TableCell>
+                                  {(() => {
+                                    const average = termScores.length > 0
+                                      ? termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length
+                                      : 0;
+                                    if (average >= 80) return 'A';
+                                    if (average >= 70) return 'B';
+                                    if (average >= 60) return 'C';
+                                    if (average >= 50) return 'D';
+                                    return 'F';
+                                  })()}
+                                </TableCell>
+                              </TableRow>
+                            ])}
+                          </TableBody>
+                        </Table>
+                      )
                     );
                   })}
                 </div>
