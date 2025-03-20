@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id        String   @id
+  firstname String
+  lastname  String
+  class     String   @db.VarChar(1)
+  semester  String
+  birthdate DateTime
+  sequence  Int      @default(autoincrement())
+  score     Score[]
+
+  @@unique([class, semester, sequence])
+}
+
+model Subject {
+  id    Int     @id @default(autoincrement())
+  name  String
+  score Score[]
+}
+
+model Score {
+  id         Int        @id @default(autoincrement())
+  value      Float
+  student_id String
+  student    Student    @relation(fields: [student_id], references: [id])
+  subject_id Int
+  subject    Subject    @relation(fields: [subject_id], references: [id])
+  term       Int
+  scoreLogs  ScoreLog[]
+
+  @@unique([student_id, subject_id, term])
+}
+
+model Teacher {
+  id        Int        @id @default(autoincrement())
+  username  String
+  password  String
+  scoreLogs ScoreLog[]
+}
+
+model ScoreLog {
+  id        Int      @id @default(autoincrement())
+  status    String
+  old_value Float?
+  new_value Float
+  score_id  Int
+  change_by Int
+  update_at DateTime
+  score     Score    @relation(fields: [score_id], references: [id])
+  teacher   Teacher  @relation(fields: [change_by], references: [id])
+}
