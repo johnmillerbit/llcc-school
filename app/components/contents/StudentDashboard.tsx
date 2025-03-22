@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardBody, CardHeader } from '@heroui/react';
 import StudentScore from './StudentScore';
 export default function StudentDashboard() {
