@@ -24,19 +24,10 @@ const SUBJECT_NAMES: Record<number, string> = {
 export default function StudentScoreView({ isOpen, onOpenChange, scores, loading }: StudentScoreViewProps) {
   const calculateTermAverage = (termScores: ScoreElement[]) => {
     if (termScores.length === 0) return 0;
-    const sum = termScores.reduce((acc, score) => {
-      const total = 
-        (score.reading || 0) +
-        (score.word_combination || 0) +
-        (score.speaking || 0) +
-        (score.listening || 0) +
-        (score.grammar || 0) +
-        (score.tense || 0) +
-        (score.translation || 0);
-      return acc + (total / 7);
-    }, 0);
+    const sum = termScores.reduce((acc, score) => acc + score.value, 0);
     return sum / termScores.length;
   };
+
   return (
     <Modal 
       size="5xl" 
@@ -95,14 +86,12 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                         </div>
                         <div className="p-6">
                           <div className="space-y-4">
-                            {termScores.map((score, index) => (
-                              <div key={index} className="flex justify-between items-center">
+                            {termScores.map((score) => (
+                              <div key={score.subject_id} className="flex justify-between items-center">
                                 <span className="text-gray-600">
-                                  {SUBJECT_NAMES[score.subject_id] || `Subject ${score.subject_id}`}
+                                  {SUBJECT_NAMES[score.subject_id]}
                                 </span>
-                                <span className="font-semibold">
-                                  {score[SUBJECT_NAMES[score.subject_id].toLowerCase().replace(' ', '_') as keyof ScoreElement] || 0}
-                                </span>
+                                <span className="font-semibold">{score.value.toFixed(2)}</span>
                               </div>
                             ))}
                             <div className="mt-6 pt-4 border-t border-gray-200">
