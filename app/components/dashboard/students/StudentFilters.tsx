@@ -43,7 +43,7 @@ export default function StudentFilters({
           onChange={(e) => onClassFilter(e.target.value)}
         >
           {classOptions.map((option) => (
-            <SelectItem key={option.key} value={option.key}>
+            <SelectItem key={option.key}>
               {option.label}
             </SelectItem>
           ))}
@@ -54,7 +54,7 @@ export default function StudentFilters({
           onChange={(e) => onSemesterFilter(e.target.value)}
         >
           {semesterOptions.map((option) => (
-            <SelectItem key={option.key} value={option.key}>
+            <SelectItem key={option.key}>
               {option.label}
             </SelectItem>
           ))}

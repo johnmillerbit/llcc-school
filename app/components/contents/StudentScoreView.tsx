@@ -1,8 +1,8 @@
-// @/app/components/StudentScoreView.tsx
 'use client';
 
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Table, TableHeader, TableBody, TableRow, TableColumn, TableCell, Button, Spinner } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Spinner } from '@heroui/react';
 import { ScoreElement } from '@/app/types/score';
+import { motion } from 'framer-motion';
 
 interface StudentScoreViewProps {
   isOpen: boolean;
@@ -11,105 +11,130 @@ interface StudentScoreViewProps {
   loading: boolean;
 }
 
-const SUBJECT_IDS = {
-  READING: 3,
-  WORD_COMBINATION: 4,
-  SPEAKING: 5,
-  LISTENING: 6,
-  GRAMMAR: 7,
-  TENSE: 8,
-  TRANSLATION: 9,
-} as const;
+const SUBJECT_NAMES: Record<number, string> = {
+  3: 'Reading',
+  4: 'Word Combination',
+  5: 'Speaking',
+  6: 'Listening',
+  7: 'Grammar',
+  8: 'Tense',
+  9: 'Translation'
+};
 
 export default function StudentScoreView({ isOpen, onOpenChange, scores, loading }: StudentScoreViewProps) {
+  const calculateTermAverage = (termScores: ScoreElement[]) => {
+    if (termScores.length === 0) return 0;
+    const sum = termScores.reduce((acc, score) => {
+      const total = 
+        (score.reading || 0) +
+        (score.word_combination || 0) +
+        (score.speaking || 0) +
+        (score.listening || 0) +
+        (score.grammar || 0) +
+        (score.tense || 0) +
+        (score.translation || 0);
+      return acc + (total / 7);
+    }, 0);
+    return sum / termScores.length;
+  };
   return (
-    <Modal size="5xl" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
+    <Modal 
+      size="5xl" 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      scrollBehavior="inside"
+      classNames={{
+        base: "bg-white rounded-2xl",
+        header: "border-b border-gray-200",
+        body: "p-6",
+        footer: "border-t border-gray-200"
+      }}
+    >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>View Student Scores</ModalHeader>
+            <ModalHeader className="flex flex-col items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-6">
+              <h2 className="text-2xl font-bold">Academic Performance Report</h2>
+            </ModalHeader>
+
             <ModalBody>
               {loading ? (
-                <div className="flex justify-center items-center">
-                  <Spinner label="Loading scores..." color="primary" />
+                <div className="flex justify-center items-center p-8">
+                  <Spinner size="lg" color="primary" />
                 </div>
               ) : scores && scores.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[1, 2, 3, 4, 5, 6].map((term) => {
                     const termScores = scores.filter((score) => score.term === term);
-                    return (
-                      termScores.length > 0 && (
-                        <Table key={term} isStriped aria-label={`Term ${term}`}>
-                          <TableHeader>
-                            <TableColumn>Subjects (Term {term})</TableColumn>
-                            <TableColumn>Scale 100</TableColumn>
-                          </TableHeader>
-                          <TableBody>
-                            {termScores.map((score) => {
-                              const subjectName = (() => {
-                                switch (score.subject_id) {
-                                  case SUBJECT_IDS.READING:
-                                    return 'Start Reading 2';
-                                  case SUBJECT_IDS.WORD_COMBINATION:
-                                    return 'Words Combination';
-                                  case SUBJECT_IDS.SPEAKING:
-                                    return 'General Speaking 1';
-                                  case SUBJECT_IDS.LISTENING:
-                                    return 'Listening Skills';
-                                  case SUBJECT_IDS.GRAMMAR:
-                                    return 'Grammar for Elementary I';
-                                  case SUBJECT_IDS.TENSE:
-                                    return 'Tense Mastery';
-                                  case SUBJECT_IDS.TRANSLATION:
-                                    return 'Translation Basics';
-                                  default:
-                                    return 'Unknown Subject';
-                                }
-                              })();
+                    if (termScores.length === 0) return null;
 
-                              return (
-                                <TableRow key={`${term}-${score.subject_id}`}>
-                                  <TableCell>{subjectName}</TableCell>
-                                  <TableCell>{score.value}</TableCell>
-                                </TableRow>
-                              );
-                            }).concat([
-                              <TableRow key={`${term}-average`}>
-                                <TableCell>Average Point</TableCell>
-                                <TableCell>
-                                  {termScores.length > 0
-                                    ? (termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length).toFixed(2)
-                                    : 'N/A'}
-                                </TableCell>
-                              </TableRow>,
-                              <TableRow key={`${term}-grade`}>
-                                <TableCell>Grade</TableCell>
-                                <TableCell>
-                                  {(() => {
-                                    const average = termScores.length > 0
-                                      ? termScores.reduce((acc, score) => acc + Number(score.value), 0) / termScores.length
-                                      : 0;
-                                    if (average >= 80) return 'A';
-                                    if (average >= 70) return 'B';
-                                    if (average >= 60) return 'C';
-                                    if (average >= 50) return 'D';
-                                    return 'F';
-                                  })()}
-                                </TableCell>
-                              </TableRow>
-                            ])}
-                          </TableBody>
-                        </Table>
-                      )
+                    const average = calculateTermAverage(termScores);
+                    const getGradeColor = (grade: string) => {
+                      switch(grade) {
+                        case 'A': return 'text-green-600';
+                        case 'B': return 'text-blue-600';
+                        case 'C': return 'text-yellow-600';
+                        case 'D': return 'text-orange-600';
+                        default: return 'text-red-600';
+                      }
+                    };
+
+                    const grade = average >= 80 ? 'A' : average >= 70 ? 'B' : average >= 60 ? 'C' : average >= 50 ? 'D' : 'F';
+                    const gradeColor = getGradeColor(grade);
+
+                    return (
+                      <motion.div
+                        key={term}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: term * 0.1 }}
+                        className="bg-white rounded-xl shadow-md overflow-hidden"
+                      >
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                          <h3 className="text-xl font-semibold text-gray-800">Term {term}</h3>
+                        </div>
+                        <div className="p-6">
+                          <div className="space-y-4">
+                            {termScores.map((score, index) => (
+                              <div key={index} className="flex justify-between items-center">
+                                <span className="text-gray-600">
+                                  {SUBJECT_NAMES[score.subject_id] || `Subject ${score.subject_id}`}
+                                </span>
+                                <span className="font-semibold">
+                                  {score[SUBJECT_NAMES[score.subject_id].toLowerCase().replace(' ', '_') as keyof ScoreElement] || 0}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="mt-6 pt-4 border-t border-gray-200">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Average</span>
+                                <span className="font-bold text-lg">{average.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between items-center mt-2">
+                                <span className="text-gray-600">Grade</span>
+                                <span className={`font-bold text-2xl ${gradeColor}`}>{grade}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
                     );
                   })}
                 </div>
               ) : (
-                <div>No scores available for any term</div>
+                <div className="text-center py-8 text-gray-500">
+                  No scores available for this student
+                </div>
               )}
             </ModalBody>
+
             <ModalFooter>
-              <Button color="danger" onPress={onClose}>
+              <Button 
+                color="danger" 
+                variant="light" 
+                onPress={onClose}
+                className="hover:bg-red-50"
+              >
                 Close
               </Button>
             </ModalFooter>

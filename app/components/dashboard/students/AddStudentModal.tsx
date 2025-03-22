@@ -1,5 +1,5 @@
 'use client';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem } from '@heroui/react';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -65,9 +65,9 @@ export default function AddStudentModal({ isOpen, onOpenChange, onSubmit }: AddS
                     isRequired
                   >
                     {classOptions.map((option) => (
-                      <option key={option.key} value={option.key}>
+                      <SelectItem key={option.key}>
                         {option.label}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                   <Select
@@ -77,9 +77,9 @@ export default function AddStudentModal({ isOpen, onOpenChange, onSubmit }: AddS
                     isRequired
                   >
                     {semesterOptions.map((option) => (
-                      <option key={option.key} value={option.key}>
+                      <SelectItem key={option.key}>
                         {option.label}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                   <Input

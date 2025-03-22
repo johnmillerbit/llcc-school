@@ -1,15 +1,17 @@
 'use client';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@heroui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEye, faPencil } from '@fortawesome/free-solid-svg-icons';
 import type { Student } from '@/app/types/student';
 
 interface StudentTableProps {
   students: Student[];
   onDelete: (id: string) => void;
+  onViewScore: (id: string) => void;
+  onEdit: (student: Student) => void;
 }
 
-export const columns = [
+const columns = [
   { name: 'ID', uid: 'id' },
   { name: 'FIRST NAME', uid: 'firstname' },
   { name: 'LAST NAME', uid: 'lastname' },
@@ -18,7 +20,7 @@ export const columns = [
   { name: 'ACTIONS', uid: 'actions' },
 ];
 
-export default function StudentTable({ students, onDelete }: StudentTableProps) {
+export default function StudentTable({ students, onDelete, onViewScore, onEdit }: StudentTableProps) {
   const renderCell = (student: Student, columnKey: React.Key) => {
     switch (columnKey) {
       case 'id':
@@ -34,6 +36,22 @@ export default function StudentTable({ students, onDelete }: StudentTableProps) 
       case 'actions':
         return (
           <div className="flex gap-2 justify-center">
+            <Button
+              isIconOnly
+              color="primary"
+              variant="light"
+              onPress={() => onViewScore(student.id)}
+            >
+              <FontAwesomeIcon icon={faEye} />
+            </Button>
+            <Button
+              isIconOnly
+              color="warning"
+              variant="light"
+              onPress={() => onEdit(student)}
+            >
+              <FontAwesomeIcon icon={faPencil} />
+            </Button>
             <Button
               isIconOnly
               color="danger"

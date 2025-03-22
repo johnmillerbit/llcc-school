@@ -5,20 +5,41 @@ import DashboardLayout from '@/app/components/dashboard/DashboardLayout';
 import StudentTable from '@/app/components/dashboard/students/StudentTable';
 import StudentFilters from '@/app/components/dashboard/students/StudentFilters';
 import AddStudentModal from '@/app/components/dashboard/students/AddStudentModal';
+import EditStudentModal from '@/app/components/dashboard/students/EditStudentModal';
+import StudentScoreView from '@/app/components/contents/StudentScoreView';
 import { getStudent } from '@/app/utils/getStudent';
+import { getScore } from '@/app/utils/getScore';
 import type { Student } from '@/app/types/student';
+import type { ScoreElement } from '@/app/types/score';
+import type { EditStudentData } from '@/app/types/editStudent';
 import Swal from 'sweetalert2';
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [scores, setScores] = useState<ScoreElement[]>([]);
+  const [loadingScores, setLoadingScores] = useState(false);
+  const [selectedStudentScores, setSelectedStudentScores] = useState<ScoreElement[]>();
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { 
+    isOpen: isScoreOpen, 
+    onOpen: onScoreOpen, 
+    onOpenChange: onScoreOpenChange 
+  } = useDisclosure();
+  const { 
+    isOpen: isEditOpen, 
+    onOpen: onEditOpen, 
+    onOpenChange: onEditOpenChange 
+  } = useDisclosure();
 
   const studentsPerPage = 10;
 
   useEffect(() => {
     fetchStudents();
+    fetchScores();
   }, []);
 
   const fetchStudents = async () => {
@@ -35,6 +56,17 @@ export default function StudentsPage() {
         description: 'Failed to fetch students',
         color: 'danger',
       });
+    }
+  };
+
+  const fetchScores = async () => {
+    try {
+      const data = await getScore();
+      if (Array.isArray(data)) {
+        setScores(data);
+      }
+    } catch (error) {
+      console.error('Error fetching scores:', error);
     }
   };
 
@@ -144,7 +176,61 @@ export default function StudentsPage() {
     }
   };
 
-  // Pagination
+  const handleViewScore = (studentId: string) => {
+    setLoadingScores(true);
+    try {
+      const studentScores = scores.filter(score => score.student_id === studentId);
+      setSelectedStudentScores(studentScores);
+      onScoreOpen();
+    } catch (error) {
+      console.error('Error loading scores:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to load student scores',
+        color: 'danger',
+      });
+    } finally {
+      setLoadingScores(false);
+    }
+  };
+
+  const handleEdit = (student: Student) => {
+    setSelectedStudent(student);
+    onEditOpen();
+  };
+
+  const handleEditSubmit = async (data: EditStudentData) => {
+    try {
+      const response = await fetch('/api/v1/admin/editStudent', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update student');
+      }
+
+      addToast({
+        title: 'Success',
+        description: 'Student updated successfully',
+        color: 'success',
+      });
+
+      fetchStudents();
+      onEditOpenChange();
+    } catch (error) {
+      console.error('Error updating student:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to update student',
+        color: 'danger',
+      });
+    }
+  };
+
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
   const startIndex = (currentPage - 1) * studentsPerPage;
   const endIndex = startIndex + studentsPerPage;
@@ -167,6 +253,8 @@ export default function StudentsPage() {
         <StudentTable 
           students={currentStudents}
           onDelete={handleDeleteStudent}
+          onViewScore={handleViewScore}
+          onEdit={handleEdit}
         />
 
         <div className="flex justify-center mt-4">
@@ -182,6 +270,23 @@ export default function StudentsPage() {
           onOpenChange={onOpenChange}
           onSubmit={handleAddStudent}
         />
+
+        <StudentScoreView
+          isOpen={isScoreOpen}
+          onOpenChange={onScoreOpenChange}
+          scores={selectedStudentScores}
+          loading={loadingScores}
+        />
+
+        {selectedStudent && (
+          <EditStudentModal
+            isOpen={isEditOpen}
+            onOpenChange={onEditOpenChange}
+            student={selectedStudent}
+            scores={scores.filter(score => score.student_id === selectedStudent.id)}
+            onSubmit={handleEditSubmit}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
