@@ -76,9 +76,9 @@ export default function StudentSearch({ student, onSearch }: StudentSearchProps)
               onChange={(e) => setSemesterQuery(e.target.value)}
               className="w-full"
             >
-              <SelectItem key="" value="">All Semesters</SelectItem>
-              <SelectItem key="2023-2024" value="2023-2024">2023-2024</SelectItem>
-              <SelectItem key="2024-2025" value="2024-2025">2024-2025</SelectItem>
+              <SelectItem key="">All Semesters</SelectItem>
+              <SelectItem key="2023-2024">2023-2024</SelectItem>
+              <SelectItem key="2024-2025">2024-2025</SelectItem>
             </Select>
 
             <Select
@@ -87,10 +87,10 @@ export default function StudentSearch({ student, onSearch }: StudentSearchProps)
               onChange={(e) => setClassQuery(e.target.value)}
               className="w-full"
             >
-              <SelectItem key="" value="">All Classes</SelectItem>
-              <SelectItem key="a" value="a">Class A</SelectItem>
-              <SelectItem key="b" value="b">Class B</SelectItem>
-              <SelectItem key="c" value="c">Class C</SelectItem>
+              <SelectItem key="">All Classes</SelectItem>
+              <SelectItem key="a">Class A</SelectItem>
+              <SelectItem key="b">Class B</SelectItem>
+              <SelectItem key="c">Class C</SelectItem>
             </Select>
           </div>
         </motion.div>

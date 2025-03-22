@@ -53,7 +53,6 @@ export default function EditStudentModal({
           translation: ''
         };
     });
-
     scores.forEach(score => {
       const scoreValue = score.value?.toString() || '';
       

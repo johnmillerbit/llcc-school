@@ -3,14 +3,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/react';
 import DashboardLayout from '@/app/components/dashboard/DashboardLayout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faUsers, 
-  faChartLine, 
-  faCheckCircle,
-  faUserGraduate,
-  faSchool,
-  faCalendarAlt 
-} from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faChartLine, faCheckCircle, faUserGraduate, faSchool, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { getStudent } from '@/app/utils/getStudent';
 import { getScore } from '@/app/utils/getScore';
 import type { Student } from '@/app/types/student';
@@ -29,7 +22,7 @@ export default function Dashboard() {
       Number(score.listening) || 0,
       Number(score.grammar) || 0,
       Number(score.tense) || 0,
-      Number(score.translation) || 0
+      Number(score.translation) || 0,
     ];
 
     const total = validScores.reduce((acc, curr) => acc + curr, 0);
@@ -38,24 +31,22 @@ export default function Dashboard() {
 
   const calculateAverageScore = (scores: ScoreElement[]): number => {
     if (!scores || scores.length === 0) return 0;
-    
-    const validScores = scores.map(score => calculateTotalScore(score))
-                              .filter(score => !isNaN(score));
-    
+
+    const validScores = scores.map(score => calculateTotalScore(score)).filter(score => !isNaN(score));
+
     if (validScores.length === 0) return 0;
-    
+
     const total = validScores.reduce((acc, score) => acc + score, 0);
     return Math.round(total / validScores.length);
   };
 
   const calculatePassingRate = (scores: ScoreElement[]): number => {
     if (!scores || scores.length === 0) return 0;
-    
-    const validScores = scores.map(score => calculateTotalScore(score))
-                              .filter(score => !isNaN(score));
-    
+
+    const validScores = scores.map(score => calculateTotalScore(score)).filter(score => !isNaN(score));
+
     if (validScores.length === 0) return 0;
-    
+
     const passingScores = validScores.filter(score => score >= 60);
     return Math.round((passingScores.length / validScores.length) * 100);
   };
@@ -63,45 +54,54 @@ export default function Dashboard() {
   const getAvailableSemesters = () => {
     const semesters = [...new Set(students.map(student => student.semester))];
     return semesters.sort().reverse();
-    };
+  };
 
   const getClassDistribution = (semester: string) => {
-    const filteredStudents = students.filter(student => 
-      semester ? student.semester === semester : true
-  );
+    const filteredStudents = students.filter(student => (semester ? student.semester === semester : true));
 
-    const distribution = filteredStudents.reduce((acc, student) => {
-      acc[student.class] = (acc[student.class] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    // Define a type-safe record for class distribution
+    type ClassDistribution = {
+        a: number;
+        b: number;
+        c: number;
+    };
 
-    const allClasses = ['A', 'B', 'C'];
-    allClasses.forEach(className => {
-      if (!distribution[className.toLowerCase()]) {
-        distribution[className.toLowerCase()] = 0;
-}
+    // Initialize with all classes set to 0
+    const distribution: ClassDistribution = {
+        a: 0,
+        b: 0,
+        c: 0
+    };
+
+    // Count students in each class
+    filteredStudents.forEach(student => {
+        const normalizedClass = student.class.toLowerCase() as keyof ClassDistribution;
+        if (normalizedClass in distribution) {
+            distribution[normalizedClass]++;
+        }
     });
 
-    return Object.entries(distribution)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .reduce((obj, [key, value]) => ({
-        ...obj,
-        [key]: value
-      }), {} as Record<string, number>);
+    return distribution;
   };
 
   const getSemesterDistribution = () => {
-    const distribution = students.reduce((acc, student) => {
-      acc[student.semester] = (acc[student.semester] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
+    const distribution = students.reduce(
+      (acc, student) => {
+        acc[student.semester] = (acc[student.semester] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
     return Object.entries(distribution)
       .sort(([a], [b]) => b.localeCompare(a))
-      .reduce((obj, [key, value]) => ({
-        ...obj,
-        [key]: value
-      }), {} as Record<string, number>);
+      .reduce(
+        (obj, [key, value]) => ({
+          ...obj,
+          [key]: value,
+        }),
+        {} as Record<string, number>
+      );
   };
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function Dashboard() {
         const studentsArray = Array.isArray(studentData) ? studentData : [];
         setStudents(studentsArray);
         setScores(Array.isArray(scoreData) ? scoreData : []);
-        
+
         const semesters = [...new Set(studentsArray.map(student => student.semester))];
         if (semesters.length > 0) {
           setSelectedSemester(semesters.sort().reverse()[0]);
@@ -157,7 +157,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {statsCards.map((stat) => (
+        {statsCards.map(stat => (
           <Card key={stat.id}>
             <CardBody className="flex items-center gap-4">
               <div className={`${stat.bgColor} p-4 rounded-full`}>
@@ -182,14 +182,14 @@ export default function Dashboard() {
             <div className="max-w-xs">
               <select
                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => setSelectedSemester(e.target.value)}
+                onChange={e => setSelectedSemester(e.target.value)}
                 defaultValue={selectedSemester}
               >
-                {getAvailableSemesters().map((semester) => (
+                {getAvailableSemesters().map(semester => (
                   <option key={semester} value={semester}>
                     {semester}
                   </option>
-              ))}
+                ))}
               </select>
             </div>
           </CardHeader>
