@@ -1,41 +1,79 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const cache = new Map()
+const cache = new Map();
 
 export async function PUT(req: NextRequest) {
   try {
-    const { std_id, term, reading, speaking, grammar, wordCombination, tense, listening, translation } = await req.json();
+    const { 
+      std_id, 
+      term, 
+      reading, 
+      speaking, 
+      grammar, 
+      wordCombination, 
+      tense, 
+      listening, 
+      translation 
+    } = await req.json();
 
+    // Input validation
     if (!std_id) {
-      throw new Error('Student id is required');
-    }
-    if (!term) {
-      throw new Error('Term id is required');
+      return NextResponse.json(
+        { error: 'Student ID is required' }, 
+        { status: 400 }
+      );
     }
 
-    // Map of subject IDs to their respective score values
+    if (!term) {
+      return NextResponse.json(
+        { error: 'Term is required' }, 
+        { status: 400 }
+      );
+    }
+
+    // Validate term is a number
+    const termNumber = Number(term);
+    if (isNaN(termNumber)) {
+      return NextResponse.json(
+        { error: 'Term must be a number' }, 
+        { status: 400 }
+      );
+    }
+    // Map of subject IDs to their respective score values with validation
     const scoreUpdates = [
-      { subjectId: 3, value: parseFloat(reading) },
-      { subjectId: 4, value: parseFloat(wordCombination) },
-      { subjectId: 5, value: parseFloat(speaking) },
-      { subjectId: 6, value: parseFloat(listening) },
-      { subjectId: 7, value: parseFloat(grammar) },
-      { subjectId: 8, value: parseFloat(tense) },
-      { subjectId: 9, value: parseFloat(translation) },
+      { subjectId: 3, value: parseFloat(reading), name: 'Reading' },
+      { subjectId: 4, value: parseFloat(wordCombination), name: 'Word Combination' },
+      { subjectId: 5, value: parseFloat(speaking), name: 'Speaking' },
+      { subjectId: 6, value: parseFloat(listening), name: 'Listening' },
+      { subjectId: 7, value: parseFloat(grammar), name: 'Grammar' },
+      { subjectId: 8, value: parseFloat(tense), name: 'Tense' },
+      { subjectId: 9, value: parseFloat(translation), name: 'Translation' },
     ];
 
+    // Validate score values
+    for (const { value, name } of scoreUpdates) {
+      if (value !== undefined && (!isNaN(value))) {
+        if (value < 0 || value > 100) {
+          return NextResponse.json(
+            { error: `${name} score must be between 0 and 100` }, 
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Process all score updates
-    for (const { subjectId, value } of scoreUpdates) {
-      if (value !== undefined && !isNaN(value)) {
-        // Add NaN check
-        await prisma.score.upsert({
+    const updatePromises = scoreUpdates
+      .filter(({ value }) => value !== undefined && !isNaN(value))
+      .map(async ({ subjectId, value }) => {
+        return prisma.score.upsert({
           where: {
             student_id_subject_id_term: {
               student_id: std_id,
               subject_id: subjectId,
-              term: term,
+              term: termNumber,
             },
           },
           update: {
@@ -44,21 +82,29 @@ export async function PUT(req: NextRequest) {
           create: {
             student_id: std_id,
             subject_id: subjectId,
-            term: term,
+            term: termNumber,
             value: value,
           },
         });
-      }
-    }
-    cache.delete("score")
+      });
 
-    return new Response(JSON.stringify({ message: 'Scores updated successfully' }), {
-      status: 200,
-    });
+    // Execute all updates in parallel
+    await Promise.all(updatePromises);
+
+    // Clear cache after successful update
+    cache.delete("score");
+
+    return NextResponse.json(
+      { message: 'Scores updated successfully' }, 
+      { status: 200 }
+    );
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: 'Failed to update scores' }), {
-      status: 500,
-    });
+    console.error('Error updating scores:', err);
+    return NextResponse.json(
+      { error: 'Failed to update scores' }, 
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }
