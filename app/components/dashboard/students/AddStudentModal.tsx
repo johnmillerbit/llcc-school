@@ -4,20 +4,14 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input
 interface AddStudentModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSubmit: (studentData: {
-    firstname: string;
-    lastname: string;
-    class: string;
-    semester: string;
-    birthdate: string;
-  }) => void;
+  onSubmit: (studentData: { firstname: string; lastname: string; stdClass: string; semester: string; birthdate: string }) => void;
 }
 
 export default function AddStudentModal({ isOpen, onOpenChange, onSubmit }: AddStudentModalProps) {
   const classOptions = [
-    { key: 'a', label: 'Class A' },
-    { key: 'b', label: 'Class B' },
-    { key: 'c', label: 'Class C' },
+    { key: 'A', label: 'Class A' },
+    { key: 'B', label: 'Class B' },
+    { key: 'C', label: 'Class C' },
   ];
 
   const semesterOptions = [
@@ -28,10 +22,11 @@ export default function AddStudentModal({ isOpen, onOpenChange, onSubmit }: AddS
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    // console.log(formData.get('birthdate'))
     onSubmit({
       firstname: formData.get('firstname') as string,
       lastname: formData.get('lastname') as string,
-      class: formData.get('class') as string,
+      stdClass: formData.get('class') as string,
       semester: formData.get('semester') as string,
       birthdate: formData.get('birthdate') as string,
     });
@@ -40,54 +35,25 @@ export default function AddStudentModal({ isOpen, onOpenChange, onSubmit }: AddS
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
-        {(onClose) => (
+        {onClose => (
           <>
             <ModalHeader>Add New Student</ModalHeader>
             <form onSubmit={handleSubmit}>
               <ModalBody>
                 <div className="space-y-4">
-                  <Input
-                    label="First Name"
-                    name="firstname"
-                    placeholder="Enter first name"
-                    isRequired
-                  />
-                  <Input
-                    label="Last Name"
-                    name="lastname"
-                    placeholder="Enter last name"
-                    isRequired
-                  />
-                  <Select
-                    label="Class"
-                    name="class"
-                    placeholder="Select a class"
-                    isRequired
-                  >
-                    {classOptions.map((option) => (
-                      <SelectItem key={option.key}>
-                        {option.label}
-                      </SelectItem>
+                  <Input label="First Name" name="firstname" placeholder="Enter first name" isRequired />
+                  <Input label="Last Name" name="lastname" placeholder="Enter last name" isRequired />
+                  <Select label="Class" name="class" placeholder="Select a class" isRequired>
+                    {classOptions.map(option => (
+                      <SelectItem key={option.key}>{option.label}</SelectItem>
                     ))}
                   </Select>
-                  <Select
-                    label="Semester"
-                    name="semester"
-                    placeholder="Select a semester"
-                    isRequired
-                  >
-                    {semesterOptions.map((option) => (
-                      <SelectItem key={option.key}>
-                        {option.label}
-                      </SelectItem>
+                  <Select label="Semester" name="semester" placeholder="Select a semester" isRequired>
+                    {semesterOptions.map(option => (
+                      <SelectItem key={option.key}>{option.label}</SelectItem>
                     ))}
                   </Select>
-                  <Input
-                    label="Birth Date"
-                    name="birthdate"
-                    type="date"
-                    isRequired
-                  />
+                  <Input label="Birth Date" name="birthdate" type="date" isRequired />
                 </div>
               </ModalBody>
               <ModalFooter>

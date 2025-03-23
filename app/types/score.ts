@@ -9,4 +9,5 @@ export interface ScoreElement {
   grammar: number;
   tense: number;
   translation: number;
+  value?: number;
 }

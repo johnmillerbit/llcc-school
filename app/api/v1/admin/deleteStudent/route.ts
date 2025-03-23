@@ -15,7 +15,14 @@ export async function DELETE(req: NextRequest) {
         id,
       },
     });
-    cache.delete('student');
+    // cache.delete('students');
+    new Promise((resolve, reject) => {
+      try {
+        resolve(cache.delete('students'));
+      } catch (error) {
+        reject('error' + error);
+      }
+    });
     return NextResponse.json({ message: 'Student deleted successfully' }, { status: 200 });
   } catch (err) {
     console.error(err);

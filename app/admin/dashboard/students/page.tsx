@@ -22,18 +22,10 @@ export default function StudentsPage() {
   const [loadingScores, setLoadingScores] = useState(false);
   const [selectedStudentScores, setSelectedStudentScores] = useState<ScoreElement[]>();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { 
-    isOpen: isScoreOpen, 
-    onOpen: onScoreOpen, 
-    onOpenChange: onScoreOpenChange 
-  } = useDisclosure();
-  const { 
-    isOpen: isEditOpen, 
-    onOpen: onEditOpen, 
-    onOpenChange: onEditOpenChange 
-  } = useDisclosure();
+  const { isOpen: isScoreOpen, onOpen: onScoreOpen, onOpenChange: onScoreOpenChange } = useDisclosure();
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
 
   const studentsPerPage = 10;
 
@@ -71,7 +63,7 @@ export default function StudentsPage() {
   };
 
   const handleSearch = (query: string) => {
-    const filtered = students.filter((student) => {
+    const filtered = students.filter(student => {
       const fullName = `${student.firstname} ${student.lastname}`.toLowerCase();
       const searchQuery = query.toLowerCase();
       return fullName.includes(searchQuery) || student.id.toLowerCase().includes(searchQuery);
@@ -81,28 +73,18 @@ export default function StudentsPage() {
   };
 
   const handleClassFilter = (classFilter: string) => {
-    const filtered = students.filter((student) => 
-      !classFilter || student.class.toLowerCase() === classFilter.toLowerCase()
-    );
+    const filtered = students.filter(student => !classFilter || student.class.toLowerCase() === classFilter.toLowerCase());
     setFilteredStudents(filtered);
     setCurrentPage(1);
   };
 
   const handleSemesterFilter = (semester: string) => {
-    const filtered = students.filter((student) => 
-      !semester || student.semester === semester
-    );
+    const filtered = students.filter(student => !semester || student.semester === semester);
     setFilteredStudents(filtered);
     setCurrentPage(1);
   };
 
-  const handleAddStudent = async (studentData: {
-    firstname: string;
-    lastname: string;
-    class: string;
-    semester: string;
-    birthdate: string;
-  }) => {
+  const handleAddStudent = async (studentData: { firstname: string; lastname: string; stdClass: string; semester: string; birthdate: string }) => {
     try {
       const response = await fetch('/api/v1/admin/addStudent', {
         method: 'POST',
@@ -143,7 +125,7 @@ export default function StudentsPage() {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes, delete it!',
       });
 
       if (result.isConfirmed) {
@@ -243,40 +225,17 @@ export default function StudentsPage() {
           <h1 className="text-2xl font-bold">Students Management</h1>
         </div>
 
-        <StudentFilters
-          onSearch={handleSearch}
-          onClassFilter={handleClassFilter}
-          onSemesterFilter={handleSemesterFilter}
-          onAddStudent={onOpen}
-        />
+        <StudentFilters onSearch={handleSearch} onClassFilter={handleClassFilter} onSemesterFilter={handleSemesterFilter} onAddStudent={onOpen} />
 
-        <StudentTable 
-          students={currentStudents}
-          onDelete={handleDeleteStudent}
-          onViewScore={handleViewScore}
-          onEdit={handleEdit}
-        />
+        <StudentTable students={currentStudents} onDelete={handleDeleteStudent} onViewScore={handleViewScore} onEdit={handleEdit} />
 
         <div className="flex justify-center mt-4">
-          <Pagination
-            total={totalPages}
-            page={currentPage}
-            onChange={setCurrentPage}
-          />
+          <Pagination total={totalPages} page={currentPage} onChange={setCurrentPage} />
         </div>
 
-        <AddStudentModal
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          onSubmit={handleAddStudent}
-        />
+        <AddStudentModal isOpen={isOpen} onOpenChange={onOpenChange} onSubmit={handleAddStudent} />
 
-        <StudentScoreView
-          isOpen={isScoreOpen}
-          onOpenChange={onScoreOpenChange}
-          scores={selectedStudentScores}
-          loading={loadingScores}
-        />
+        <StudentScoreView isOpen={isScoreOpen} onOpenChange={onScoreOpenChange} scores={selectedStudentScores} loading={loadingScores} />
 
         {selectedStudent && (
           <EditStudentModal

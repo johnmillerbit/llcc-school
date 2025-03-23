@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@heroui/react';
+// import { Button } from '@heroui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 
@@ -12,13 +12,13 @@ export default function StudentHeader() {
             <FontAwesomeIcon icon={faGraduationCap} className="text-2xl" />
             <h1 className="text-2xl font-bold">LLCC School</h1>
           </div>
-          <Button
+          {/* <Button
             color="default"
             variant="bordered"
             className="text-white border-white hover:bg-white/20"
           >
             Student Portal
-          </Button>
+          </Button> */}
         </div>
       </div>
     </header>

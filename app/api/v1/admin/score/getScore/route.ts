@@ -6,7 +6,7 @@ const cache = new Map();
 
 export async function GET() {
   try {
-    let score = cache.get('score');
+    let score = cache.get('');
     if (!score) {
       score = await prisma.score.findMany();
       cache.set('score', score);

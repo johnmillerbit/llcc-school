@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const cache = new Map();
 
 async function generateStudentId(classId: string, semester: string): Promise<string> {
   const year = semester.split('-')[0].slice(-2);
@@ -17,7 +16,6 @@ async function generateStudentId(classId: string, semester: string): Promise<str
       sequence: 'desc',
     },
   });
-  cache.delete("student")
 
   const sequence = (lastStudent?.sequence ?? 0) + 1;
   const paddedSequence = sequence.toString().padStart(2, '0');
@@ -26,29 +24,24 @@ async function generateStudentId(classId: string, semester: string): Promise<str
 }
 
 export async function POST(req: NextRequest) {
-  const form = await req.formData();
-  const firstname = form.get('firstname');
-  const lastname = form.get('lastname');
-  const stdClass = form.get('stdClass');
-  const semester = form.get('semester');
-  const birthDate = form.get('birthDate');
+  const { firstname, lastname, stdClass, semester, birthdate } = await req.json();
 
   try {
-    if (!firstname || !lastname || !stdClass || !semester || !birthDate) {
+    if (!firstname || !lastname || !stdClass || !semester || !birthdate) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    if (typeof firstname !== 'string' || typeof lastname !== 'string' || typeof stdClass !== 'string' || typeof semester !== 'string' || typeof birthDate !== 'string') {
+    if (typeof firstname !== 'string' || typeof lastname !== 'string' || typeof stdClass !== 'string' || typeof semester !== 'string' || typeof birthdate !== 'string') {
       return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
     }
 
-    const parsedBirthDate = new Date(birthDate);
+    const parsedbirthdate = new Date(birthdate);
     const today = new Date();
-    if (parsedBirthDate > today) {
-      return NextResponse.json({ error: 'birthDate cannot be in the future' }, { status: 400 });
+    if (parsedbirthdate > today) {
+      return NextResponse.json({ error: 'birthdate cannot be in the future' }, { status: 400 });
     }
-    if (isNaN(parsedBirthDate.getTime())) {
-      return NextResponse.json({ error: 'Invalid birthDate format' }, { status: 400 });
+    if (isNaN(parsedbirthdate.getTime())) {
+      return NextResponse.json({ error: 'Invalid birthdate format' }, { status: 400 });
     }
 
     const studentId = await generateStudentId(stdClass, semester);
@@ -60,7 +53,7 @@ export async function POST(req: NextRequest) {
         lastname,
         class: stdClass,
         semester,
-        birthdate: parsedBirthDate,
+        birthdate: parsedbirthdate,
       },
     });
 

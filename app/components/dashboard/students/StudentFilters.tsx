@@ -64,7 +64,7 @@ export default function StudentFilters({
       <Button
         color="primary"
         startContent={<FontAwesomeIcon icon={faPlus} />}
-        onClick={onAddStudent}
+        onPress={onAddStudent}
       >
         Add Student
       </Button>

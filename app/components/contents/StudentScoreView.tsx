@@ -18,31 +18,32 @@ const SUBJECT_NAMES: Record<number, string> = {
   6: 'Listening',
   7: 'Grammar',
   8: 'Tense',
-  9: 'Translation'
+  9: 'Translation',
 };
 
 export default function StudentScoreView({ isOpen, onOpenChange, scores, loading }: StudentScoreViewProps) {
   const calculateTermAverage = (termScores: ScoreElement[]) => {
-    if (termScores.length === 0) return 0;
-    const sum = termScores.reduce((acc, score) => acc + score.value, 0);
-    return sum / termScores.length;
+    const validScores = termScores.filter(score => score.value !== undefined);
+    if (validScores.length === 0) return 0;
+    const sum = validScores.reduce((acc, score) => acc + (score.value as number), 0);
+    return sum / validScores.length;
   };
 
   return (
-    <Modal 
-      size="5xl" 
-      isOpen={isOpen} 
-      onOpenChange={onOpenChange} 
+    <Modal
+      size="5xl"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       scrollBehavior="inside"
       classNames={{
-        base: "bg-white rounded-2xl",
-        header: "border-b border-gray-200",
-        body: "p-6",
-        footer: "border-t border-gray-200"
+        base: 'bg-white rounded-2xl',
+        header: 'border-b border-gray-200',
+        body: 'p-6',
+        footer: 'border-t border-gray-200',
       }}
     >
       <ModalContent>
-        {(onClose) => (
+        {onClose => (
           <>
             <ModalHeader className="flex flex-col items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-6">
               <h2 className="text-2xl font-bold">Academic Performance Report</h2>
@@ -55,18 +56,23 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                 </div>
               ) : scores && scores.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {[1, 2, 3, 4, 5, 6].map((term) => {
-                    const termScores = scores.filter((score) => score.term === term);
+                  {[1, 2, 3, 4, 5, 6].map(term => {
+                    const termScores = scores.filter(score => score.term === term);
                     if (termScores.length === 0) return null;
 
                     const average = calculateTermAverage(termScores);
                     const getGradeColor = (grade: string) => {
-                      switch(grade) {
-                        case 'A': return 'text-green-600';
-                        case 'B': return 'text-blue-600';
-                        case 'C': return 'text-yellow-600';
-                        case 'D': return 'text-orange-600';
-                        default: return 'text-red-600';
+                      switch (grade) {
+                        case 'A':
+                          return 'text-green-600';
+                        case 'B':
+                          return 'text-blue-600';
+                        case 'C':
+                          return 'text-yellow-600';
+                        case 'D':
+                          return 'text-orange-600';
+                        default:
+                          return 'text-red-600';
                       }
                     };
 
@@ -86,12 +92,10 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                         </div>
                         <div className="p-6">
                           <div className="space-y-4">
-                            {termScores.map((score) => (
+                            {termScores.map(score => (
                               <div key={score.subject_id} className="flex justify-between items-center">
-                                <span className="text-gray-600">
-                                  {SUBJECT_NAMES[score.subject_id]}
-                                </span>
-                                <span className="font-semibold">{score.value.toFixed(2)}</span>
+                                <span className="text-gray-600">{SUBJECT_NAMES[score.subject_id]}</span>
+                                <span className="font-semibold">{score.value !== undefined ? score.value.toFixed(2) : "N/A"}</span>
                               </div>
                             ))}
                             <div className="mt-6 pt-4 border-t border-gray-200">
@@ -111,19 +115,12 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
                   })}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No scores available for this student
-                </div>
+                <div className="text-center py-8 text-gray-500">No scores available for this student</div>
               )}
             </ModalBody>
 
             <ModalFooter>
-              <Button 
-                color="danger" 
-                variant="light" 
-                onPress={onClose}
-                className="hover:bg-red-50"
-              >
+              <Button color="danger" variant="light" onPress={onClose} className="hover:bg-red-50">
                 Close
               </Button>
             </ModalFooter>
