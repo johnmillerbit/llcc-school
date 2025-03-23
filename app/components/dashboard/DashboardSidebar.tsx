@@ -6,7 +6,6 @@ import {
   faUsers, 
   faChartBar, 
   faCog,
-  faGraduationCap
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,7 +21,6 @@ export default function DashboardSidebar({ isOpen }: DashboardSidebarProps) {
   const menuItems = [
     { icon: faHome, label: 'Overview', path: '/admin/dashboard' },
     { icon: faUsers, label: 'Students', path: '/admin/dashboard/students' },
-    { icon: faGraduationCap, label: 'Scores', path: '/admin/dashboard/scores' },
     { icon: faChartBar, label: 'Analytics', path: '/admin/dashboard/analytics' },
     { icon: faCog, label: 'Settings', path: '/admin/dashboard/settings' },
   ];
