@@ -7,12 +7,7 @@ export interface EditStudentData {
   birthdate: string;
   scores: {
     term: number;
-    reading: number;
-    word_combination: number;
-    speaking: number;
-    listening: number;
-    grammar: number;
-    tense: number;
-    translation: number;
+    subject_id: number;
+    value: number;
   }[];
 }

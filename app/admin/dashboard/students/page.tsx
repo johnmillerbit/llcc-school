@@ -176,10 +176,12 @@ export default function StudentsPage() {
     }
   };
 
-  const handleEdit = (student: Student) => {
-    setSelectedStudent(student);
-    onEditOpen();
-  };
+  // const handleEdit = (student: Student) => {
+  //   setSelectedStudent(null)
+  //   setSelectedStudent(student);
+  //   console.log(student.id)
+  //   onEditOpen();
+  // };
 
   const handleEditSubmit = async (data: EditStudentData) => {
     try {
@@ -227,7 +229,16 @@ export default function StudentsPage() {
 
         <StudentFilters onSearch={handleSearch} onClassFilter={handleClassFilter} onSemesterFilter={handleSemesterFilter} onAddStudent={onOpen} />
 
-        <StudentTable students={currentStudents} onDelete={handleDeleteStudent} onViewScore={handleViewScore} onEdit={handleEdit} />
+        <StudentTable
+          students={currentStudents}
+          onDelete={handleDeleteStudent}
+          onViewScore={handleViewScore}
+          onEdit={e => {
+            setSelectedStudent(e);
+            console.log(selectedStudent)
+            onEditOpen()
+          }}
+        />
 
         <div className="flex justify-center mt-4">
           <Pagination total={totalPages} page={currentPage} onChange={setCurrentPage} />

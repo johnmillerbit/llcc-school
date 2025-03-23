@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Student } from '@/app/types/student';
 import type { ScoreElement } from '@/app/types/score';
 import type { EditStudentData } from '@/app/types/editStudent';
+import { format } from 'date-fns';
 
 type ScoreData = { [key: string]: string };
 
@@ -80,16 +81,24 @@ export default function EditStudentModal({ isOpen, onOpenChange, student, scores
 
   const handleSubmit = async () => {
     try {
-      const formattedScores = Object.entries(scoreData).map(([term, scores]) => ({
-        term: Number(term),
-        reading: Number(scores.reading) || 0,
-        word_combination: Number(scores.word_combination) || 0,
-        speaking: Number(scores.speaking) || 0,
-        listening: Number(scores.listening) || 0,
-        grammar: Number(scores.grammar) || 0,
-        tense: Number(scores.tense) || 0,
-        translation: Number(scores.translation) || 0,
-      }));
+      const subjectMap = {
+        reading: 3,
+        word_combination: 4,
+        speaking: 5,
+        listening: 6,
+        grammar: 7,
+        tense: 8,
+        translation: 9,
+      };
+
+      const formattedScores = Object.entries(scoreData).flatMap(([term, scores]) => {
+        const termNumber = Number(term);
+        return Object.entries(subjectMap).map(([subject, subject_id]) => ({
+          term: termNumber,
+          subject_id: subject_id,
+          value: Number(scores[subject]) || 0,
+        }));
+      });
 
       await onSubmit({
         ...studentData,
@@ -128,24 +137,23 @@ export default function EditStudentModal({ isOpen, onOpenChange, student, scores
                       <SelectItem key="B">Class B</SelectItem>
                       <SelectItem key="C">Class C</SelectItem>
                     </Select>
-                    <Select label="Semester" value={studentData.semester} defaultSelectedKeys={[studentData.semester]} onChange={e => setStudentData({ ...studentData, semester: e.target.value })}>
+                    <Select label="Semester" defaultSelectedKeys={[studentData.semester]} onChange={e => setStudentData({ ...studentData, semester: e.target.value })}>
                       <SelectItem key="2023-2024">2023-2024</SelectItem>
                       <SelectItem key="2024-2025">2024-2025</SelectItem>
                     </Select>
-                    <Input type="date" label="Birthdate" value={studentData.birthdate} onChange={e => setStudentData({ ...studentData, birthdate: e.target.value })} />
+                    <Input
+                      type="date"
+                      label="Birthdate"
+                      defaultValue={format(new Date(studentData.birthdate.toString()), 'yyyy-MM-dd')}
+                      onChange={e => setStudentData({ ...studentData, birthdate: e.target.value })}
+                    />
                   </div>
                 </Tab>
                 <Tab key="scores" title="Scores">
                   <div className="space-y-6 p-4">
-                    <Select
-                      label="Select Term"
-                      value={selectedTerm.toString()}
-                      onChange={e => setSelectedTerm(Number(e.target.value))}
-                    >
+                    <Select label="Select Term" value={selectedTerm.toString()} onChange={e => setSelectedTerm(Number(e.target.value))}>
                       {[1, 2, 3, 4, 5, 6].map(term => (
-                        <SelectItem key={term}>
-                          Term {term}
-                        </SelectItem>
+                        <SelectItem key={term}>Term {term}</SelectItem>
                       ))}
                     </Select>
 

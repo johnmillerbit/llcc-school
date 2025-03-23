@@ -45,7 +45,7 @@ export default function StudentScoreView({ isOpen, onOpenChange, scores, loading
       <ModalContent>
         {onClose => (
           <>
-            <ModalHeader className="flex flex-col items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-6">
+            <ModalHeader className="flex flex-col items-center bg-blue-600 rounded-t-2xl text-white py-6">
               <h2 className="text-2xl font-bold">Academic Performance Report</h2>
             </ModalHeader>
 
