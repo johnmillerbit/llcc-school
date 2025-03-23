@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    // Update scores
+    
     for (const score of data.scores) {
       await prisma.score.upsert({
         where: {

@@ -202,6 +202,7 @@ export default function StudentsPage() {
       });
 
       fetchStudents();
+      fetchScores();
       onEditOpenChange();
     } catch (error) {
       console.error('Error updating student:', error);

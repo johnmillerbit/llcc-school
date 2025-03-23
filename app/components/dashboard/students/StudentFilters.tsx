@@ -34,12 +34,16 @@ export default function StudentFilters({
       <div className="flex flex-col md:flex-row gap-4">
         <Input
           placeholder="Search students..."
+          aria-label="Search students"
+
           startContent={<FontAwesomeIcon icon={faMagnifyingGlass} />}
           onChange={(e) => onSearch(e.target.value)}
         />
         
         <Select
           placeholder="Select class"
+          aria-label="Select class"
+
           onChange={(e) => onClassFilter(e.target.value)}
         >
           {classOptions.map((option) => (
@@ -51,6 +55,8 @@ export default function StudentFilters({
 
         <Select
           placeholder="Select semester"
+          aria-label="Select semester"
+
           onChange={(e) => onSemesterFilter(e.target.value)}
         >
           {semesterOptions.map((option) => (
