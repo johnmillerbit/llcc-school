@@ -22,7 +22,7 @@ export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (Array.isArray(data)) {
           setStudents(data);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to fetch students');
       } finally {
         setLoading(false);
