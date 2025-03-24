@@ -133,7 +133,6 @@ export default function EditStudentModal({ isOpen, onOpenChange, student, scores
                       <SelectItem key="4">Term 4</SelectItem>
                       <SelectItem key="5">Term 5</SelectItem>
                       <SelectItem key="6">Term 6</SelectItem>
-                      <SelectItem key="7">Term 7</SelectItem>
                     </Select>
                     {selectedTerm ? (
                       <div className="space-y-4">
