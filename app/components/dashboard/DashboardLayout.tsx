@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Card } from '@heroui/react';
 import DashboardSidebar from '@/app/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/app/components/dashboard/DashboardHeader';
+import { Toaster } from 'react-hot-toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -13,12 +14,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-gray-50">
       <DashboardSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       <div className={`${isSidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
-        <DashboardHeader 
-          username={session?.user?.username || ''} 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-        />
+        <DashboardHeader username={session?.user?.username || ''} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="p-6">
           <Card className="p-6">
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                success: {
+                  style: {
+                    background: '#4CAF50',
+                    color: 'white',
+                  },
+                },
+                error: {
+                  style: {
+                    background: '#F44336',
+                    color: 'white',
+                  },
+                },
+              }}
+            />
             {children}
           </Card>
         </main>

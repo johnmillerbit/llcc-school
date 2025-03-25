@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
+interface Score {
+  subject_id: number;
+  term: number;
+  value: number;
+}
+
 const prisma = new PrismaClient();
 
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    
-    // Update student details
+
+    // Update student details (this part remains unchanged)
     await prisma.student.update({
       where: { id: data.id },
       data: {
@@ -19,9 +25,9 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    
-    for (const score of data.scores) {
-      await prisma.score.upsert({
+    // Prepare all upsert operations as an array of promises
+    const upsertPromises = data.scores.map((score: Score) =>
+      prisma.score.upsert({
         where: {
           student_id_subject_id_term: {
             student_id: data.id,
@@ -38,8 +44,11 @@ export async function PUT(req: NextRequest) {
           term: score.term,
           value: score.value,
         },
-      });
-    }
+      })
+    );
+
+    // Execute all upserts concurrently
+    await Promise.all(upsertPromises);
 
     return NextResponse.json({ message: 'Student updated successfully' });
   } catch (error) {
