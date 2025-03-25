@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const cache = new Map();
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -14,14 +13,6 @@ export async function DELETE(req: NextRequest) {
       where: {
         id,
       },
-    });
-    // cache.delete('students');
-    new Promise((resolve, reject) => {
-      try {
-        resolve(cache.delete('students'));
-      } catch (error) {
-        reject('error' + error);
-      }
     });
     return NextResponse.json({ message: 'Student deleted successfully' }, { status: 200 });
   } catch (err) {

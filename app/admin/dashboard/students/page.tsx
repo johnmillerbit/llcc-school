@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useDisclosure, Pagination, addToast } from '@heroui/react';
+import { useDisclosure, Pagination } from '@heroui/react';
 import DashboardLayout from '@/app/components/dashboard/DashboardLayout';
 import StudentTable from '@/app/components/dashboard/students/StudentTable';
 import StudentFilters from '@/app/components/dashboard/students/StudentFilters';
@@ -13,6 +13,7 @@ import type { Student } from '@/app/types/student';
 import type { ScoreElement } from '@/app/types/score';
 import type { EditStudentData } from '@/app/types/editStudent';
 import Swal from 'sweetalert2';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -43,11 +44,7 @@ export default function StudentsPage() {
       }
     } catch (error) {
       console.error('Error fetching students:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to fetch students',
-        color: 'danger',
-      });
+      toast.error('Failed to fetch students');
     }
   };
 
@@ -59,6 +56,7 @@ export default function StudentsPage() {
       }
     } catch (error) {
       console.error('Error fetching scores:', error);
+      toast.error('Failed to fetch scores');
     }
   };
 
@@ -86,6 +84,8 @@ export default function StudentsPage() {
 
   const handleAddStudent = async (studentData: { firstname: string; lastname: string; stdClass: string; semester: string; birthdate: string }) => {
     try {
+      const loadingToast = toast.loading('Adding student...');
+      onOpenChange();
       const response = await fetch('/api/v1/admin/addStudent', {
         method: 'POST',
         headers: {
@@ -94,25 +94,17 @@ export default function StudentsPage() {
         body: JSON.stringify(studentData),
       });
 
+      toast.dismiss(loadingToast);
+
       if (!response.ok) {
         throw new Error('Failed to add student');
       }
 
-      addToast({
-        title: 'Success',
-        description: 'Student added successfully',
-        color: 'success',
-      });
-
-      fetchStudents();
-      onOpenChange();
+      await fetchStudents();
+      toast.success('Student added successfully');
     } catch (error) {
       console.error('Error adding student:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to add student',
-        color: 'danger',
-      });
+      toast.error('Failed to add student');
     }
   };
 
@@ -129,6 +121,7 @@ export default function StudentsPage() {
       });
 
       if (result.isConfirmed) {
+        const loadingToast = toast.loading('Deleting student...');
         const response = await fetch('/api/v1/admin/deleteStudent', {
           method: 'DELETE',
           headers: {
@@ -136,25 +129,17 @@ export default function StudentsPage() {
           },
           body: JSON.stringify({ id }),
         });
-
+        toast.dismiss(loadingToast);
         if (!response.ok) {
           throw new Error('Failed to delete student');
         }
 
         await fetchStudents();
-        addToast({
-          title: 'Success',
-          description: 'Student deleted successfully',
-          color: 'success',
-        });
+        toast.success('Student deleted successfully');
       }
     } catch (error) {
       console.error('Error deleting student:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to delete student',
-        color: 'danger',
-      });
+      toast.error('Failed to delete student');
     }
   };
 
@@ -166,11 +151,7 @@ export default function StudentsPage() {
       onScoreOpen();
     } catch (error) {
       console.error('Error loading scores:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to load student scores',
-        color: 'danger',
-      });
+      toast.error('Failed to load student scores');
     } finally {
       setLoadingScores(false);
     }
@@ -183,6 +164,8 @@ export default function StudentsPage() {
 
   const handleEditSubmit = async (data: EditStudentData) => {
     try {
+      const loadingToast = toast.loading('Updating student...');
+      onEditOpenChange();
       const response = await fetch('/api/v1/admin/editStudent', {
         method: 'PUT',
         headers: {
@@ -191,26 +174,18 @@ export default function StudentsPage() {
         body: JSON.stringify(data),
       });
 
+      toast.dismiss(loadingToast);
+
       if (!response.ok) {
         throw new Error('Failed to update student');
       }
 
-      addToast({
-        title: 'Success',
-        description: 'Student updated successfully',
-        color: 'success',
-      });
-
-      fetchStudents();
-      fetchScores();
-      onEditOpenChange();
+      await fetchStudents();
+      await fetchScores();
+      toast.success('Student updated successfully');
     } catch (error) {
       console.error('Error updating student:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to update student',
-        color: 'danger',
-      });
+      toast.error('Failed to update student');
     }
   };
 
@@ -221,6 +196,23 @@ export default function StudentsPage() {
 
   return (
     <DashboardLayout>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          success: {
+            style: {
+              background: '#4CAF50',
+              color: 'white',
+            },
+          },
+          error: {
+            style: {
+              background: '#F44336',
+              color: 'white',
+            },
+          },
+        }}
+      />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Students Management</h1>

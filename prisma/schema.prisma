@@ -36,7 +36,7 @@ model Score {
   id         Int        @id @default(autoincrement())
   value      Float
   student_id String
-  student    Student    @relation(fields: [student_id], references: [id])
+  student    Student    @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   subject_id Int
   subject    Subject    @relation(fields: [subject_id], references: [id])
   term       Int
@@ -60,6 +60,6 @@ model ScoreLog {
   score_id  Int
   change_by Int
   update_at DateTime
-  score     Score    @relation(fields: [score_id], references: [id])
+  score     Score    @relation(fields: [score_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teacher   Teacher  @relation(fields: [change_by], references: [id])
 }
