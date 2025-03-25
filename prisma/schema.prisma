@@ -55,8 +55,8 @@ model Teacher {
 model EventLog {
   id        Int      @id @default(autoincrement())
   status    String
-  old_value Float?
-  new_value Float?
+  old_value String?
+  new_value String?
   score_id  Int?
   do_by Int
   update_at DateTime

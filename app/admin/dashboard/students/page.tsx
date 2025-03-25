@@ -176,7 +176,7 @@ export default function StudentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({data, teacher}),
       });
 
       toast.dismiss(loadingToast);
