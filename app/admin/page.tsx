@@ -1,6 +1,6 @@
 'use client';
 import { Form, Input, Button, Card } from '@heroui/react';
-import { signIn, signOut } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -61,7 +61,6 @@ export default function Login() {
             Login
           </Button>
         </Form>
-        <Button onPress={() => signOut()}>Log out</Button>
       </Card>
     </div>
   );

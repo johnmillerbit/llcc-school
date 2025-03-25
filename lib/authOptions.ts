@@ -7,9 +7,10 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-interface Teacher {
+interface AuthUser {
   id: string;
   username: string;
+  role: 'USER' | 'TEACHER';
 }
 
 export const authOptions: NextAuthOptions = {
@@ -27,11 +28,10 @@ export const authOptions: NextAuthOptions = {
           type: 'password',
         },
       },
-      async authorize(credentials): Promise<Teacher | null> {
+      async authorize(credentials): Promise<AuthUser | null> {
         if (!credentials?.username || !credentials?.password) {
           return null;
         }
-
         try {
           const teacher = await prisma.teacher.findFirst({
             where: {
@@ -39,18 +39,34 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          if (!teacher?.password) {
-            throw new Error('Invalid email or password');
+          if (teacher) {
+            const isPasswordValid = await bcrypt.compare(credentials.password, teacher.password);
+            if (isPasswordValid) {
+              return {
+                id: String(teacher.id),
+                username: teacher.username,
+                role: 'TEACHER',
+              };
+            }
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, teacher.password);
+          // If not a teacher, try to find a user
+          // const user = await prisma.user.findFirst({
+          //   where: {
+          //     username: credentials.username,
+          //   },
+          // });
 
-          if (teacher && isPasswordValid) {
-            return {
-              id: String(teacher.id),
-              username: teacher.username,
-            };
-          }
+          // if (user) {
+          //   const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          //   if (isPasswordValid) {
+          //     return {
+          //       id: String(user.id),
+          //       username: user.username,
+          //       role: 'USER',
+          //     };
+          //   }
+          // }
 
           throw new Error('Invalid email or password');
         } catch (error) {
@@ -69,6 +85,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.username = user.username;
+        token.role = user.role;
       }
       return token;
     },
@@ -76,6 +93,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = String(token.id);
         session.user.username = token.username;
+        session.user.role = token.role;
       }
       return session;
     },
