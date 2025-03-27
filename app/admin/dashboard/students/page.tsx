@@ -13,7 +13,8 @@ import type { Student } from '@/app/types/student';
 import type { ScoreElement } from '@/app/types/score';
 import type { EditStudentData } from '@/app/types/editStudent';
 import Swal from 'sweetalert2';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -23,17 +24,21 @@ export default function StudentsPage() {
   const [loadingScores, setLoadingScores] = useState(false);
   const [selectedStudentScores, setSelectedStudentScores] = useState<ScoreElement[]>();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [teacher, setTeacher] = useState<string>();
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: isScoreOpen, onOpen: onScoreOpen, onOpenChange: onScoreOpenChange } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
+
+  const session = useSession();
 
   const studentsPerPage = 10;
 
   useEffect(() => {
     fetchStudents();
     fetchScores();
-  }, []);
+    setTeacher(session.data?.user.id);
+  }, [session]);
 
   const fetchStudents = async () => {
     try {
@@ -91,7 +96,7 @@ export default function StudentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(studentData),
+        body: JSON.stringify({studentData, teacher}),
       });
 
       toast.dismiss(loadingToast);
@@ -127,7 +132,7 @@ export default function StudentsPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ id, teacher }),
         });
         toast.dismiss(loadingToast);
         if (!response.ok) {
@@ -171,7 +176,7 @@ export default function StudentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({data, teacher}),
       });
 
       toast.dismiss(loadingToast);
@@ -196,23 +201,6 @@ export default function StudentsPage() {
 
   return (
     <DashboardLayout>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          success: {
-            style: {
-              background: '#4CAF50',
-              color: 'white',
-            },
-          },
-          error: {
-            style: {
-              background: '#F44336',
-              color: 'white',
-            },
-          },
-        }}
-      />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Students Management</h1>

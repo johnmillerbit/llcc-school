@@ -5,13 +5,21 @@ const prisma = new PrismaClient();
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { id } = await req.json();
+    const { id, teacher } = await req.json();
     if (!id) {
       return NextResponse.json({ error: 'Student ID is required' }, { status: 400 });
     }
-    await prisma.student.delete({
+    const student = await prisma.student.delete({
       where: {
         id,
+      },
+    });
+    await prisma.eventLog.create({
+      data: {
+        status: 'DELETE_STUDENT',
+        new_value: `${student.firstname} ${student.lastname}`,
+        do_by: Number(teacher),
+        update_at: new Date(),
       },
     });
     return NextResponse.json({ message: 'Student deleted successfully' }, { status: 200 });

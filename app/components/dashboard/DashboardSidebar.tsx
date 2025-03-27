@@ -21,7 +21,7 @@ export default function DashboardSidebar({ isOpen }: DashboardSidebarProps) {
   const menuItems = [
     { icon: faHome, label: 'Overview', path: '/admin/dashboard' },
     { icon: faUsers, label: 'Students', path: '/admin/dashboard/students' },
-    { icon: faChartBar, label: 'Analytics', path: '/admin/dashboard/analytics' },
+    { icon: faChartBar, label: 'Event log', path: '/admin/dashboard/eventlog' },
     { icon: faCog, label: 'Settings', path: '/admin/dashboard/settings' },
   ];
 
