@@ -7,13 +7,13 @@ import DashboardHeader from '@/app/components/dashboard/DashboardHeader';
 import { Toaster } from 'react-hot-toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-hidden">
       <DashboardSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <div className={`${isSidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
+      <div className={`${isSidebarOpen ? 'ml-36' : 'ml-0'} transition-all duration-300`}>
         <DashboardHeader username={session?.user?.username || ''} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="p-6">
           <Card className="p-6">
