@@ -96,7 +96,7 @@ export default function StudentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(studentData),
+        body: JSON.stringify({studentData, teacher}),
       });
 
       toast.dismiss(loadingToast);
@@ -132,7 +132,7 @@ export default function StudentsPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ id, teacher }),
         });
         toast.dismiss(loadingToast);
         if (!response.ok) {

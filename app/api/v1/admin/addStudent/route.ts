@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-
 async function generateStudentId(classId: string, semester: string): Promise<string> {
   const year = semester.split('-')[0].slice(-2);
 
@@ -24,18 +23,24 @@ async function generateStudentId(classId: string, semester: string): Promise<str
 }
 
 export async function POST(req: NextRequest) {
-  const { firstname, lastname, stdClass, semester, birthdate } = await req.json();
+  const { studentData, teacher } = await req.json();
 
   try {
-    if (!firstname || !lastname || !stdClass || !semester || !birthdate) {
+    if (!studentData.firstname || !studentData.lastname || !studentData.stdClass || !studentData.semester || !studentData.birthdate) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    if (typeof firstname !== 'string' || typeof lastname !== 'string' || typeof stdClass !== 'string' || typeof semester !== 'string' || typeof birthdate !== 'string') {
+    if (
+      typeof studentData.firstname !== 'string' ||
+      typeof studentData.lastname !== 'string' ||
+      typeof studentData.stdClass !== 'string' ||
+      typeof studentData.semester !== 'string' ||
+      typeof studentData.birthdate !== 'string'
+    ) {
       return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
     }
 
-    const parsedbirthdate = new Date(birthdate);
+    const parsedbirthdate = new Date(studentData.birthdate);
     const today = new Date();
     if (parsedbirthdate > today) {
       return NextResponse.json({ error: 'birthdate cannot be in the future' }, { status: 400 });
@@ -44,16 +49,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid birthdate format' }, { status: 400 });
     }
 
-    const studentId = await generateStudentId(stdClass, semester);
+    const studentId = await generateStudentId(studentData.stdClass, studentData.semester);
 
     const student = await prisma.student.create({
       data: {
         id: studentId,
-        firstname,
-        lastname,
-        class: stdClass,
-        semester,
+        firstname: studentData.firstname,
+        lastname: studentData.lastname,
+        class: studentData.stdClass,
+        semester: studentData.semester,
         birthdate: parsedbirthdate,
+      },
+    });
+
+    await prisma.eventLog.create({
+      data: {
+        status: 'ADD_STUDENT',
+        student_id: student.id,
+        do_by: Number(teacher),
+        update_at: new Date(),
       },
     });
 

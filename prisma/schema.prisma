@@ -14,22 +14,24 @@ datasource db {
 }
 
 model Student {
-  id        String   @id
+  id        String     @id
   firstname String
   lastname  String
-  class     String   @db.VarChar(1)
+  class     String     @db.VarChar(1)
   semester  String
   birthdate DateTime
-  sequence  Int      @default(autoincrement())
+  sequence  Int        @default(autoincrement())
   score     Score[]
+  eventLogs EventLog[]
 
   @@unique([class, semester, sequence])
 }
 
 model Subject {
-  id    Int     @id @default(autoincrement())
-  name  String
-  score Score[]
+  id        Int        @id @default(autoincrement())
+  name      String
+  score     Score[]
+  eventLogs EventLog[]
 }
 
 model Score {
@@ -40,7 +42,7 @@ model Score {
   subject_id Int
   subject    Subject    @relation(fields: [subject_id], references: [id])
   term       Int
-  scoreLogs  EventLog[]
+  eventLogs  EventLog[]
 
   @@unique([student_id, subject_id, term])
 }
@@ -49,17 +51,22 @@ model Teacher {
   id        Int        @id @default(autoincrement())
   username  String
   password  String
-  scoreLogs EventLog[]
+  eventLogs EventLog[]
 }
 
 model EventLog {
-  id        Int      @id @default(autoincrement())
-  status    String
-  old_value String?
-  new_value String?
-  score_id  Int?
-  do_by Int
-  update_at DateTime
-  score     Score?    @relation(fields: [score_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  teacher   Teacher  @relation(fields: [do_by], references: [id])
+  id         Int      @id @default(autoincrement())
+  status     String
+  old_value  String?
+  new_value  String?
+  score_id   Int?
+  student_id String?
+  term       Int?
+  subject_id Int?
+  do_by      Int
+  update_at  DateTime
+  score      Score?   @relation(fields: [score_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  teacher    Teacher  @relation(fields: [do_by], references: [id])
+  student    Student? @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subject    Subject? @relation(fields: [subject_id], references: [id])
 }

@@ -19,9 +19,12 @@ interface StudentData {
 
 interface UpdateLog {
   status: string;
-  old_value: string;
+  old_value?: string | null;
   new_value: string;
+  term?: number;
+  student_id: string;
   score_id?: number;
+  subject_id?: number;
 }
 
 const prisma = new PrismaClient();
@@ -34,6 +37,7 @@ export async function PUT(req: NextRequest) {
     const existingStudent = await prisma.student.findUnique({
       where: { id: data.id },
       select: {
+        id: true,
         firstname: true,
         lastname: true,
         class: true,
@@ -62,6 +66,7 @@ export async function PUT(req: NextRequest) {
           status: 'UPDATE_FIRSTNAME',
           old_value: existingStudent.firstname,
           new_value: data.firstname,
+          student_id: existingStudent.id,
         });
       }
       if (existingStudent.lastname !== data.lastname) {
@@ -69,6 +74,7 @@ export async function PUT(req: NextRequest) {
           status: 'UPDATE_LASTNAME',
           old_value: existingStudent.lastname,
           new_value: data.lastname,
+          student_id: existingStudent.id,
         });
       }
       if (existingStudent.class !== data.class) {
@@ -76,6 +82,7 @@ export async function PUT(req: NextRequest) {
           status: 'UPDATE_CLASS',
           old_value: existingStudent.class,
           new_value: data.class,
+          student_id: existingStudent.id,
         });
       }
       if (existingStudent.semester !== data.semester) {
@@ -83,6 +90,7 @@ export async function PUT(req: NextRequest) {
           status: 'UPDATE_SEMESTER',
           old_value: existingStudent.semester,
           new_value: data.semester,
+          student_id: existingStudent.id,
         });
       }
       if (existingStudent.birthdate.toISOString().split('T')[0] !== new Date(data.birthdate).toISOString().split('T')[0]) {
@@ -90,6 +98,7 @@ export async function PUT(req: NextRequest) {
           status: 'UPDATE_BIRTHDATE',
           old_value: existingStudent.birthdate.toISOString().split('T')[0],
           new_value: new Date(data.birthdate).toISOString().split('T')[0],
+          student_id: existingStudent.id,
         });
       }
 
@@ -127,6 +136,9 @@ export async function PUT(req: NextRequest) {
     const scoreUpdateLogs: UpdateLog[] = [];
     const upsertPromises = data.scores
       .filter((score: Score) => {
+        // Skip updating if score value is 0
+        if (score.value === 0) return false;
+
         const existingScore = existingScores.find(existing => existing.subject_id === score.subject_id && existing.term === score.term);
 
         // Only update if the score doesn't exist or has a different value
@@ -142,7 +154,21 @@ export async function PUT(req: NextRequest) {
             old_value: String(existingScore.value),
             new_value: String(score.value),
             score_id: existingScore.id,
+            student_id: data.id,
+            subject_id: score.subject_id,
+            term: score.term,
           });
+        }
+
+        if (!existingScore) {
+          scoreUpdateLogs.push({
+            status: 'ADD_SCORE',
+            new_value: String(score.value),
+            student_id: data.id,
+            subject_id: score.subject_id,
+            term: score.term,
+          });
+          console.log(score.subject_id)
         }
 
         // Upsert operation
@@ -177,6 +203,7 @@ export async function PUT(req: NextRequest) {
             new_value: String(log.new_value),
             do_by: Number(teacher),
             update_at: new Date(),
+            student_id: log.student_id,
           },
         })
       ),
@@ -190,6 +217,9 @@ export async function PUT(req: NextRequest) {
             score_id: update.score_id ?? null,
             do_by: Number(teacher),
             update_at: new Date(),
+            student_id: update.student_id,
+            term: update.term,
+            subject_id: update.subject_id
           },
         })
       ),
